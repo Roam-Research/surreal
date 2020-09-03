@@ -1,0 +1,13 @@
+{:paths
+ ["src"]
+ :deps
+ {org.clojure/clojurescript {:mvn/version "1.10.773"}
+  datascript                {:mvn/version "1.0.0"}}
+ :aliases
+ {:dev  {:extra-paths ["dev"]
+         :extra-deps  {thheller/shadow-cljs {:mvn/version "2.10.21"}
+                       binaryage/devtools   {:mvn/version "1.0.2"}}}
+  :test {:extra-paths ["test"]
+         :extra-deps  {org.clojure/test.check   {:mvn/version "1.0.0"}
+                       lambdaisland/kaocha      {:mvn/version "1.0.672"}
+                       lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}}}}

@@ -1,0 +1,12 @@
+;; shadow-cljs configuration
+{:deps   {:aliases [:dev]}
+
+ :nrepl  {:port 9002}
+ :builds {:dev {:target           :browser
+                :compiler-options {:verbose true
+                                   :checked-arrays :warn}
+                :output-dir       "resources/public/js"
+                :asset-path       "/js"
+                :modules          {:main {:init-fn surreal-dev/init}}
+                :devtools         {:http-port 8022
+                                   :http-root "resources/public"}}}}

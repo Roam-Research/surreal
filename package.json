@@ -1,0 +1,8 @@
+{
+  "name": "surreal",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "shadow-cljs": "^2.11.1"
+  }
+}
