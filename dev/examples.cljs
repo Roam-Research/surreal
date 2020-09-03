@@ -1,4 +1,4 @@
-(ns surreal-dev
+(ns examples
   (:require [roam.surreal :as surr]
             [datascript.core :as d]
             [roam.surreal.datascript :as sd]))
