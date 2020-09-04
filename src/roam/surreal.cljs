@@ -70,21 +70,89 @@
         )))
   )
 
-(defn walk-js
+(defn walk-js-data-structures
   [inner outer form]
   (cond
-    (array? form) (outer (.map form (fn [v] (inner v))))
+    (array? form) (outer (.map form (fn [v]
+                                      (inner v))))
+    ;; todo figure out if this can be made faster
     (object? form) (outer (js/Object.fromEntries
                             (.map (js/Object.entries form)
                               (fn [kv]
-                                #js [(inner (aget kv 0))
-                                     (inner (aget kv 1))]
+                                (outer
+                                  #js [(inner (aget kv 0))
+                                       (inner (aget kv 1))])
                                 ))))
-    :else (outer form)))
+    :else form))
 
-(defn postwalk-js
+(defn postwalk-js-data-structures
   [f form]
-  (walk-js (partial postwalk-js f) f form))
+  (walk-js-data-structures (partial postwalk-js-data-structures f) f form))
 
-(defn hydrate [^js obj]
-  (postwalk-js hydrate-obj obj))
+(comment
+  (postwalk-js-data-structures
+    (fn [x] (js/console.log "walk-js" x) x)
+    (clj->js {:1 {:2   [1 2 3]
+                  :2.1 [4]}}))
+
+  (require '[clojure.walk])
+  (clojure.walk/postwalk
+    (fn [x] (when (coll? x) (println "walk-cljs" x)) x)
+    {:1 {:2   [1 2 3]
+         :2.1 [4]}})
+  )
+
+(defn walk-js-objects
+  [inner outer form]
+  (cond
+    (array? form) (.map form (fn [v]
+                               (inner v)))
+    ;; todo figure out if this can be made faster
+    (instance? js/Object form) (outer (js/Object.fromEntries
+                                        (.map (js/Object.entries form)
+                                          (fn [kv]
+                                            #js [(aget kv 0)
+                                                 (inner (aget kv 1))]
+                                            ))))
+    :else form))
+
+(defn postwalk-js-objects
+  [f form]
+  (walk-js-objects (partial postwalk-js-objects f) f form))
+
+(defn strip
+  "Removes the keyvals of CLJS datastructures that may be incompatible with
+  document stores like Firebase. Use hydrate to restore."
+  [^js obj]
+  (postwalk-js-objects
+    (fn [x]
+      (if (instance? js/Object x)
+        (doto x
+          (gobj/remove "cljs$lang$protocol_mask$partition0$")
+          (gobj/remove "cljs$lang$protocol_mask$partition1$"))
+        x
+        ))
+    obj))
+
+(defn hydrate
+  "Walks a JavaScript object of instance-method-stripped CLJS data-structures (e.g. read
+  from indexedDB, Firebase or sent over a webworker) and restores them."
+  [^js obj]
+  (postwalk-js-data-structures hydrate-obj obj))
+
+(comment
+
+  (js/console.log (strip {:1 {:2 [1 2 3]}}))
+  ;; strip + roundtrip
+  (let [v      {:1 {:2 [1 2 3]}}
+        stripv (strip v)
+        jsonv  (js/JSON.stringify stripv)
+        parsev (js/JSON.parse jsonv)
+        hv     (hydrate parsev)
+        equal? (= v hv)]
+    (js/console.log "roundtrip-result" hv)
+    (js/console.log "works in cljs" (clj->js (update-in hv [:1 :2] conj 4)))
+    (js/console.log "equal?" equal?)
+    (js/console.log "out type" (pr-str (type hv)))
+    hv)
+  )
