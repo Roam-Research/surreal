@@ -1,6 +1,24 @@
 # surreal
 
-Performance optimized CLJS<->JSON serialization library. 
+**CLJS DataStructures <-> JSON hydration library.**
+
+Surreal dispatches on as few predicates
+of JS fields in serialized CLJS data-structures as possible
+to identify and re-hydrate required functions and fields on the object
+that have been stripped during JSON serialization.    
+
+Surreal is solely about speed. This also acts as the
+excuse for its otherwise less than ideal code.   
+
+Works with IndexedDB directly (no JSON.stringify required).
+
+## Examples
+
+See `dev/examples.cljs`
+
+## Status
+
+PoC / Alpha. 
 
 ## Get started
 
@@ -25,7 +43,7 @@ Turn it into CLJS by running:
 ## Todo
 
 - [ ] add impls for more data-types
-- [ ] allow users to extend `hydrate-obj` with additional data-matchers/transformers
+- [ ] add extension points for additional data-matchers/transformers to `hydrate-obj` 
 - [ ] setup proper cljs tests
 
 ## License

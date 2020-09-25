@@ -33,7 +33,7 @@
   (roundtrip [{:foo [:bar [1 2 3] #{:baz}]}]))
 
 (defn datascript-db-roundtrip []
-  (let [ids        (range -1 0)
+  (let [ids        (range -1000 0)
         persons    (mapv
                      (fn [id]
                        {:db/id          id
